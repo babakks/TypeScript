@@ -899,6 +899,10 @@
         "category": "Error",
         "code": 1274
     },
+    "'accessor' modifier can only appear on a property declaration.": {
+        "category": "Error",
+        "code": 1275
+    },
 
     "'with' statements are not allowed in an async function block.": {
         "category": "Error",
@@ -7421,5 +7425,9 @@
     "'{0}' is automatically exported here.": {
         "category": "Message",
         "code": 18044
+    },
+    "Properties with the 'accessor' modifier are only available when targeting ECMAScript 2015 and higher.": {
+        "category": "Error",
+        "code": 18045
     }
 }
