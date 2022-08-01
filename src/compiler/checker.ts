@@ -26762,7 +26762,7 @@ namespace ts {
         function getContextualTypeForReturnExpression(node: Expression, contextFlags: ContextFlags | undefined): Type | undefined {
             const func = getContainingFunction(node);
             if (func) {
-                let contextualReturnType = getContextualReturnType(func, contextFlags);
+                let contextualReturnType = getContextualReturnType(func, contextFlags, true);
                 if (contextualReturnType) {
                     const functionFlags = getFunctionFlags(func);
                     if (functionFlags & FunctionFlags.Generator) { // Generator or AsyncGenerator function
@@ -26800,7 +26800,7 @@ namespace ts {
             const func = getContainingFunction(node);
             if (func) {
                 const functionFlags = getFunctionFlags(func);
-                const contextualReturnType = getContextualReturnType(func, contextFlags);
+                const contextualReturnType = getContextualReturnType(func, contextFlags, false);
                 if (contextualReturnType) {
                     return node.asteriskToken
                         ? contextualReturnType
@@ -26829,7 +26829,7 @@ namespace ts {
 
         function getContextualIterationType(kind: IterationTypeKind, functionDecl: SignatureDeclaration): Type | undefined {
             const isAsync = !!(getFunctionFlags(functionDecl) & FunctionFlags.Async);
-            const contextualReturnType = getContextualReturnType(functionDecl, /*contextFlags*/ undefined);
+            const contextualReturnType = getContextualReturnType(functionDecl, /*contextFlags*/ undefined, false);
             if (contextualReturnType) {
                 return getIterationTypeOfGeneratorFunctionReturnType(kind, contextualReturnType, isAsync)
                     || undefined;
@@ -26838,7 +26838,7 @@ namespace ts {
             return undefined;
         }
 
-        function getContextualReturnType(functionDecl: SignatureDeclaration, contextFlags: ContextFlags | undefined): Type | undefined {
+        function getContextualReturnType(functionDecl: SignatureDeclaration, contextFlags: ContextFlags | undefined, skipIfImmediatelyInvokedFunctionExpression: boolean): Type | undefined {
             // If the containing function has a return type annotation, is a constructor, or is a get accessor whose
             // corresponding set accessor has a type annotation, return statements in the function are contextually typed
             const returnType = getReturnTypeFromAnnotation(functionDecl);
@@ -26851,9 +26851,11 @@ namespace ts {
             if (signature && !isResolvingReturnTypeOfSignature(signature)) {
                 return getReturnTypeOfSignature(signature);
             }
-            const iife = getImmediatelyInvokedFunctionExpression(functionDecl);
-            if (iife) {
-                return getContextualType(iife, contextFlags);
+            if (!skipIfImmediatelyInvokedFunctionExpression) {
+                const iife = getImmediatelyInvokedFunctionExpression(functionDecl);
+                if (iife) {
+                    return getContextualType(iife, contextFlags);
+                }
             }
             return undefined;
         }
